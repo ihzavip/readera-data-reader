@@ -12,3 +12,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+pre {
+  overflow-x: auto;
+  white-space: pre-wrap; /* wraps long lines */
+  word-break: break-word;
+}
