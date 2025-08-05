@@ -1,8 +1,7 @@
-
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import Markdown from "react-markdown";
 import JSZip from "jszip";
-
 
 function generateMarkdown(entry) {
   const title = entry?.data?.doc_title || "Untitled";
@@ -25,7 +24,6 @@ function generateMarkdown(entry) {
   return `## ${title}\n\n${lines.join("\n")}`;
 }
 
-
 function App() {
   const [output, setOutput] = useState([]);
 
@@ -40,7 +38,9 @@ function App() {
     if (isBak || isZip) {
       const zip = new JSZip();
       try {
-        const renamedFile = new File([file], "renamed.zip", { type: "application/zip" });
+        const renamedFile = new File([file], "renamed.zip", {
+          type: "application/zip",
+        });
         const content = await zip.loadAsync(renamedFile);
 
         const libraryFile = content.file("library.json");
@@ -59,7 +59,9 @@ function App() {
         setOutput(["Failed to unzip or read library.json"]);
       }
     } else {
-      setOutput(["Unsupported file type. Only .zip or disguised .bak accepted."]);
+      setOutput([
+        "Unsupported file type. Only .zip or disguised .bak accepted.",
+      ]);
     }
   }, []);
 
@@ -73,7 +75,6 @@ function App() {
   });
 
   return (
-
     <div className="min-h-screen max-w-xl overflow-x-hidden flex flex-col items-center justify-center p-8 bg-gray-50">
       <h1 className="text-2xl font-bold mb-6 text-yellow-900 underline">
         Upload .bak (renamed zip) or .zip
@@ -81,28 +82,53 @@ function App() {
 
       <div
         {...getRootProps()}
-        className={`border-4 border-dashed rounded-xl p-10 w-full max-w-xl text-center cursor-pointer transition ${isDragActive ? "border-yellow-600 bg-yellow-100" : "border-gray-300"
-          }`}
+        className={`border-4 border-dashed rounded-xl p-10 w-full max-w-xl text-center cursor-pointer transition ${
+          isDragActive ? "border-yellow-600 bg-yellow-100" : "border-gray-300"
+        }`}
       >
         <input {...getInputProps()} />
         <p className="text-gray-600">
-          Drag and drop a <code>.bak</code> (zip disguised) or <code>.zip</code> file here, or click to select.
+          Drag and drop a <code>.bak</code> (zip disguised) or <code>.zip</code>{" "}
+          file here, or click to select.
         </p>
       </div>
 
       {output.length > 0 && (
+        <div className="w-full max-w-3xl break-words">
+          {output.map((book, index) => (
+            <div
+              key={index}
+              className="max-w-screen break-words"
+              style={{ position: "relative", marginBottom: "1.5rem" }}
+            >
+              <button
+                onClick={() => navigator.clipboard.writeText(book)}
+                style={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  zIndex: 10,
+                  fontSize: "0.8rem",
+                  padding: "4px 8px",
+                  cursor: "pointer",
+                }}
+              >
+                Copy
+              </button>
 
-        <div className="max-w-screen">
-          <pre className="mt-6 bg-white shadow p-4 rounded text-sm whitespace-pre-wrap break-words overflow-x-hidden">
-            {output.join("\n\n")}
-          </pre>
-
+              {/* INFO: Don't need markdown, we use button */}
+              <Markdown>{["```txt", book, "```"].join("\n")}</Markdown>
+              {/* <div className="max-w-screen">
+                <code className="mt-6 bg-white shadow p-4 rounded text-sm whitespace-pre-wrap break-words overflow-x-hidden">
+                  {output.join("\n\n")}
+                </code>
+              </div> */}
+            </div>
+          ))}
         </div>
-
       )}
     </div>
   );
 }
 
 export default App;
-
